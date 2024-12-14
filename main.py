@@ -1,107 +1,84 @@
-from downloading import process_video_download, process_audio_download
-from transcription import transcribe_audio, split_sentences, get_unique_words, select_file, process_transcription, \
-    get_unique_words_with_dict
-import threading
-
+from downloading import download_video, download_audio
+from transcription import select_file, process_transcription
 
 import tkinter as tk
 from tkinter import ttk
 
 
-
-
-
-
-
-
-
-# Основная функция для создания GUI
 def create_gui():
-    # Создаем главное окно
     root = tk.Tk()
-    root.title("Видео загрузчик")
+    root.title("Media Manager")
 
-    # Создаем объект Notebook для вкладок
     notebook = ttk.Notebook(root)
     notebook.pack(padx=10, pady=10, fill='both', expand=True)
 
-    # Вкладка 1: Загрузка видео/аудио
+    # Tab 1: Video/Audio Download
     tab_download = ttk.Frame(notebook)
-    notebook.add(tab_download, text="Скачать")
+    notebook.add(tab_download, text="Download")
 
     frame_download = tk.Frame(tab_download)
     frame_download.pack(padx=10, pady=10)
 
-    tk.Label(frame_download, text="Ссылка на видео:").pack()
-    url_entry = tk.Entry(frame_download, width=40)
+    tk.Label(frame_download, text="Enter media URL:").pack()
+    url_entry = tk.Entry(frame_download, width=50)
     url_entry.pack()
 
-    # Кнопка для скачивания видео
-    download_video_button = tk.Button(frame_download, text="Скачать видео",
-                                      command=lambda: process_video_download(url_entry.get(),
-                                                                             status_label))
+    download_video_button = tk.Button(
+        frame_download,
+        text="Download Video",
+        command=lambda: handle_download(download_video, url_entry.get(), status_label)
+    )
     download_video_button.pack(pady=5)
 
-    # Кнопка для скачивания только аудио
-    download_audio_button = tk.Button(frame_download, text="Скачать только аудио", command=lambda: process_audio_download(url_entry.get(),
-                                                                             status_label))
+    download_audio_button = tk.Button(
+        frame_download,
+        text="Download Audio Only",
+        command=lambda: handle_download(download_audio, url_entry.get(), status_label)
+    )
     download_audio_button.pack(pady=5)
 
-    # Метка для статуса
-    status_label = tk.Label(frame_download, text="")
+    status_label = tk.Label(frame_download, text="", fg="blue")
     status_label.pack()
 
-    # Вкладка 2: Обработка файла
+    # Tab 2: Media Processing
     tab_process = ttk.Frame(notebook)
-    notebook.add(tab_process, text="Обработка")
+    notebook.add(tab_process, text="Process Media")
 
     frame_process = tk.Frame(tab_process)
     frame_process.pack(padx=10, pady=10)
 
-    tk.Label(frame_process, text="Выберите файл для обработки:").pack()
-    select_file_button = tk.Button(frame_process, text="Выбрать файл", command=lambda: select_file(process_label))
+    tk.Label(frame_process, text="Select a media file for processing:").pack()
+    select_file_button = tk.Button(
+        frame_process,
+        text="Select File",
+        command=lambda: select_file(process_status_label)
+    )
     select_file_button.pack(pady=5)
 
-    process_button = tk.Button(frame_process, text="Транскрибировать", command=lambda: process_transcription(process_label))
+    process_button = tk.Button(
+        frame_process,
+        text="Create Translation",
+        command=lambda: process_transcription(process_status_label)
+    )
     process_button.pack(pady=10)
 
-    process_label = tk.Label(frame_process, text="")
-    process_label.pack()
+    process_status_label = tk.Label(frame_process, text="", fg="blue")
+    process_status_label.pack()
 
-    # Вкладка 3: Создание списка
-    tab_process = ttk.Frame(notebook)
-    notebook.add(tab_process, text="Создание списка")
-
-    frame_list = tk.Frame(tab_process)
-    frame_list.pack(padx=10, pady=10)
-
-    tk.Label(frame_list, text="Выберите файл для обработки:").pack()
-    select_file_button = tk.Button(frame_list, text="Выбрать файл", command=lambda: select_file(process_label))
-    select_file_button.pack(pady=5)
-
-    process_button = tk.Button(frame_list, text="Создать список", command=lambda: get_unique_words(process_label))
-    process_button.pack(pady=10)
-
-    process_button = tk.Button(frame_list, text="Создать проверенный список", command=lambda: get_unique_words_with_dict(process_label))
-    process_button.pack(pady=10)
-
-
-    process_button = tk.Button(frame_list, text="Перевести список", command=lambda: get_unique_words(process_label))
-    process_button.pack(pady=10)
-
-    process_label = tk.Label(frame_list, text="")
-    process_label.pack()
-
-
-
-
-
-
-    # Запуск главного цикла приложения
     root.mainloop()
+
+
+def handle_download(download_function, url, status_label):
+    if not url.strip():
+        status_label.config(text="Please enter a URL!", fg="red")
+        return
+
+    try:
+        download_function(url, status_label)
+    except Exception as e:
+        status_label.config(text="Download error. Check the URL.", fg="red")
+        print(f"Error: {e}")
 
 
 if __name__ == "__main__":
     create_gui()
-
-#https://www.youtube.com/watch?v=uTocTDcE0PY mgs codec
