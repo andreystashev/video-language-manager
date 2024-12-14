@@ -9,20 +9,6 @@ from nltk.data import find
 import eng_to_ipa as ipa
 from deep_translator import GoogleTranslator
 
-import sys
-
-
-def get_resource_path(relative_path):
-    """Returns the resource path for development and packaged application."""
-    try:
-        # For PyInstaller packed application
-        base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
-        return os.path.join(base_path, relative_path)
-    except Exception:
-        # For development mode
-        return os.path.join(os.path.dirname(os.path.abspath(__file__)), relative_path)
-
-
 try:
     find('corpora/words.zip')
 except LookupError:
@@ -81,8 +67,7 @@ def process_transcription(process_label):
 
 
 def transcribe_audio(audio_path):
-    assets_path = get_resource_path('whisper/assets')  # Path to the assets folder
-    model = whisper.load_model("base", download_root=assets_path)
+    model = whisper.load_model("base")
     result = model.transcribe(audio_path)
     return result["text"]
 
