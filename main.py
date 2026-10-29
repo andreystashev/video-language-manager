@@ -57,7 +57,7 @@ def create_gui():
 
     process_button = tk.Button(
         frame_process,
-        text="Create Translation",
+        text="Create Vocabulary List",
         command=lambda: process_transcription(process_status_label)
     )
     process_button.pack(pady=10)
@@ -74,7 +74,7 @@ def handle_download(download_function, url, status_label):
         return
 
     try:
-        download_function(url, status_label)
+        download_function(url.strip(), status_label)
     except Exception as e:
         status_label.config(text="Download error. Check the URL.", fg="red")
         print(f"Error: {e}")

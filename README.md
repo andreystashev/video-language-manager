@@ -1,23 +1,59 @@
 # Video Language Manager
-## Описание
-Video Language Manager — это программа, которая позволяет скачивать видео и аудио по ссылке, а затем извлекать английские слова, формируя удобный список с транскрипцией и переводом для дальнейшего изучения языка.
 
-## Предварительные требования
-Вам нужно установить Python 3.x.
-Для работы программы необходимо установить библиотеки:
-#### whisper для транскрипции аудио.
-#### deep_translator для перевода слов.
-#### nltk для работы со списком слов.
-## Использование
-Загрузка видео и аудио:
-Введите ссылку на видео (YouTube или другие источники) в соответствующее поле программы.
-Выберите, хотите ли вы скачать видео или только аудио.
-Извлечение английских слов:
-После скачивания, программа анализирует текст в аудиофайле или видео, извлекает уникальные английские слова и создает список.
-Создание списка с транскрипцией и переводом:
-Программа автоматически генерирует транскрипцию для каждого слова и переводит их на русский язык, создавая удобный список для изучения.
-## Возможности
-Скачивание видео и аудио с разных платформ по ссылке.
-Извлечение английских слов из аудиофайлов или видео.
-Формирование списка слов с транскрипцией и переводом для удобства изучения.
-Простой и понятный интерфейс для использования.
+A small Tkinter desktop application for turning English audio and video into vocabulary lists. Download media with yt-dlp, transcribe a local MP3 or MP4 with OpenAI Whisper, and export unique English words with IPA pronunciation and Russian translations.
+
+## Requirements
+
+- Python 3.10–3.12 and Tkinter.
+- The **FFmpeg command-line executable** on `PATH`. It is required by Whisper and by media conversion; a Python package named `ffmpeg` does not replace it.
+- Internet access for media downloads, the first Whisper model download, NLTK corpus setup, and Google Translate requests through `deep-translator`.
+
+Install FFmpeg with your operating system's package manager, for example `brew install ffmpeg` on macOS or `sudo apt install ffmpeg python3-tk python3-venv` on Debian/Ubuntu. On Windows, install FFmpeg and add its executable directory to `PATH`. Check it with `ffmpeg -version`.
+
+## Setup and launch
+
+```sh
+git clone https://github.com/andreystashev/video-language-manager.git
+cd video-language-manager
+python -m venv .venv
+source .venv/bin/activate
+# Windows PowerShell: .venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
+python -m nltk.downloader words
+python main.py
+```
+
+The Whisper distribution is **`openai-whisper`**. The unrelated package named `whisper` is not needed. The first transcription downloads the Whisper `base` model; later runs use its local cache.
+
+## Use
+
+1. In **Download**, enter a URL supported by yt-dlp and choose **Download Video** or **Download Audio Only**. Choose the destination in the save dialog. Audio is converted to MP3; video is merged or remuxed to MP4. Conversion can fail if the source codec cannot be placed in an MP4 container.
+2. In **Process Media**, select a local MP3 or MP4. This is a separate step: downloads are not selected automatically.
+3. Choose **Create Vocabulary List** and select a `.txt` destination.
+
+The output is sorted alphabetically, with one word per line:
+
+```text
+word                             |IPA pronunciation                |Russian translation
+```
+
+Words are lowercase, unique, at least two letters long, and restricted to `a`–`z` entries in the NLTK English word corpus. Proper names, contractions, and specialist vocabulary may be omitted or split. A recording with no matching words produces an empty file.
+
+Existing destination files are replaced only after a download or vocabulary export succeeds. Canceling or a failed processing step preserves the previous file.
+
+## Limitations
+
+- This is a synchronous desktop prototype: downloading, model inference, and translation run on the GUI thread and can temporarily make the window unresponsive.
+- Transcription is configured for English; word translations target Russian. It does not translate subtitles or an entire transcript.
+- Transcription runs locally, but each extracted word is sent to Google Translate. Availability and rate limits depend on that external service.
+- yt-dlp support depends on the source website. If a supported URL stops working, try `python -m pip install --upgrade yt-dlp`.
+- IPA and translation quality depend on the installed libraries and services. No packaged executable is included.
+
+## Development checks
+
+```sh
+python -m unittest discover -s tests -v
+python -m compileall -q main.py downloading.py transcription.py
+```
+
+Regression tests replace downloads, transcription, and translation with fakes. They cover file preservation, conversion options, empty input, word filtering, and processing errors without downloading a model or contacting external services. A desktop session and real media are still needed to validate the complete GUI workflow.
