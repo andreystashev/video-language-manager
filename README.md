@@ -51,9 +51,16 @@ Existing destination files are replaced only after a download or vocabulary expo
 
 ## Development checks
 
+Run from the repository root. The isolated regression suite needs only Python
+and Tkinter; the application dependencies, FFmpeg, models, and corpora are not
+needed for these checks.
+
 ```sh
 python -m unittest discover -s tests -v
-python -m compileall -q main.py downloading.py transcription.py
+python -m compileall -q main.py downloading.py transcription.py tests
 ```
+
+The [Python checks workflow](.github/workflows/python-checks.yml) runs these
+commands on Python 3.11 for pushes and pull requests.
 
 Regression tests replace downloads, transcription, and translation with fakes. They cover file preservation, conversion options, empty input, word filtering, and processing errors without downloading a model or contacting external services. A desktop session and real media are still needed to validate the complete GUI workflow.
